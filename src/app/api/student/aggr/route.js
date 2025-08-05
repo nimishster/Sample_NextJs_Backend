@@ -4,6 +4,20 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   await connectMongoDB();
-  const count = await student.countDocuments();
-  return NextResponse.json({ count });
+  const result = await student.aggregate([
+    {
+      $group: {
+        _id: "$city",
+        totalMarks: { $sum: "$marks" }
+      }
+    },
+    {
+      $project: {
+        city: "$_id",
+        totalMarks: 1,
+        _id: 0
+      }
+    }
+  ]);
+  return NextResponse.json({ result });
 }
